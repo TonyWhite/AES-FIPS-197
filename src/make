@@ -1,0 +1,10 @@
+#!/bin/bash
+reset
+g++ -std=c++11 *.cpp -o /tmp/aes-fips-197
+if [[ $? == 0 ]]; then
+  /tmp/./aes-fips-197
+fi
+
+if [[ -f /tmp/chaos.main ]]; then
+	rm /tmp/aes-fips-197
+fi
