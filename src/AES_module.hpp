@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _AES_MODULE_H
+#define _AES_MODULE_H
 
 #include <iostream>
 #include <iomanip>
@@ -83,7 +84,7 @@ private:
 	void Cipher(void);
 	void InvCipher(void);
 	void EqInvCipher(void);
-	
+
 	void print_state(const std::vector<std::vector<byte>>&) const;
 	void print_word(const std::vector<byte>&) const;
 
@@ -106,3 +107,4 @@ public:
 	void test_standard(void);
 
 };
+#endif

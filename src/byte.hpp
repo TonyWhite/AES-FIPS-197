@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BYTE_H
+#define _BYTE_H
 
 #include <iostream>
 #include <iomanip>
@@ -46,5 +47,6 @@ public:
 	std::bitset<8> to_bitset(void) const;
 
 	friend std::ostream& operator<< (std::ostream &, byte &);
-	
+
 };
+#endif
