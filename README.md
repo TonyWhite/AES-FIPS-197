@@ -5,18 +5,25 @@ C++ code implementing the Advanced Encryption Standard (AES) block cipher as spe
 
 ## Overview
 
-This code implements the Advanced Encryption Standard (AES) block cipher as described in the original FIPS Publication 197 by the NIST. Hence, only the bare block cipher is implemented. This might then be combined with one of the many block modes of operation to obtain a stream cipher.
+This code implements the Advanced Encryption Standard (AES) block cipher as described in the original FIPS Publication 197 by the NIST. Hence, only the bare block cipher is implemented. This will be combined with one of the many block modes of operation to obtain a stream cipher.
 
-Note: This implementation comes with no warranty and should not be used in mission critical scenarios.
-
-## Build
-
-```
-make
-```
-
-The compiled executable can then be found the directory `bin/`.
+Note: This implementation does not come with any guarantees.
 
 ## References
 
-"Announcing the ADVANCED ENCRYPTION STANDARD (AES)". Federal Information Processing Standards Publication 197. United States National Institute of Standards and Technology (NIST). DOI: [10.6028/NIST.FIPS.197](https://doi.org/10.6028/NIST.FIPS.197).
+1. Forked from Jan Mölter's [aes](https://github.com/janmoelter/aes) project.
+2. "Announcing the ADVANCED ENCRYPTION STANDARD (AES)". Federal Information Processing Standards Publication 197. United States National Institute of Standards and Technology (NIST). DOI: [10.6028/NIST.FIPS.197](https://doi.org/10.6028/NIST.FIPS.197).
+
+## Test
+
+Launch test in `src` directory
+
+```
+./make
+```
+
+The executable will be compiled into the `/tmp` folder and will be deleted when it finishes running.
+
+## The goal
+
+Prepare easy-to-use source code for mission critical scenarios.
