@@ -1,4 +1,4 @@
-#include "AES_module.hpp"
+#include "AES_FIPS_197.h"
 
 bool AES_module::verbose = false;
 
@@ -49,7 +49,7 @@ void AES_module::initialize(void)
 		{
 			this->_rcon[i] = { this->_rcon[i-1][0] * byte(0x02) , byte(0x00) , byte(0x00) , byte(0x00) };
 		}
-		
+
 	}
 }
 
@@ -81,7 +81,7 @@ AES_module::~AES_module()
 void AES_module::print_state(const std::vector<std::vector<byte>> &_state) const
 {
 	std::cout << "╓" << std::string(5 * this->Nb + 2, ' ') << "╖" << std::endl;
-	
+
 	for (uint8_t r = 0x00; r < 0x04; r++)
 	{
 		std::cout << "║";
@@ -108,7 +108,7 @@ void AES_module::print_word(const std::vector<byte> &word) const
 }
 
 void AES_module::print_keyschedule_string(const std::vector<std::vector<byte>> &_keyschedule,const uint8_t &round) const
-{	
+{
 	for (uint8_t c = 0x00; c < this->Nb; c++)
 	{
 		for (uint8_t r = 0x00; r < 0x04; r++)
@@ -152,7 +152,7 @@ void AES_module::print_bytetable(const std::vector<uint8_t> &bytemap) const
 
 void AES_module::print_keyschedule(const std::vector<std::vector<byte>> &_keyschedule) const
 {
-	
+
 	for (uint8_t i = 0x00; i < _keyschedule.size(); i++)
 	{
 		std::cout << "(" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)i << std::hex << ")";
@@ -202,7 +202,7 @@ std::vector<byte> AES_module::to_word(const std::vector<std::vector<byte>> &stat
 
 void AES_module::Cipher(void)
 {
-	
+
 	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(0) << "].input" << "\t\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
 
 	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(0) << "].k_sch" << "\t\t"; this->print_keyschedule_string(0); }
@@ -245,7 +245,7 @@ void AES_module::InvCipher(void)
 
 	for (uint8_t round = this->Nr - 1; round > 0; round--)
 	{
-		
+
 		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr - round) << "].istart" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
 		this->InvShiftRows();
 		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr - round) << "].is_row" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
@@ -272,15 +272,15 @@ void AES_module::InvCipher(void)
 
 void AES_module::EqInvCipher(void)
 {
-	
+
 	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(0) << "].iinput" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
-	
+
 	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(0) << "].ik_sch" << "\t"; this->print_keyschedule_string(this->_altkeyschedule,this->Nr); }
 	this->AddRoundKey(this->_altkeyschedule,this->_state,this->Nr);
-	
+
 	for (uint8_t round = this->Nr - 1; round > 0; round--)
 	{
-		
+
 		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr - round) << "].istart" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
 		this->InvSubBytes();
 		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr - round) << "].is_box" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
@@ -291,7 +291,7 @@ void AES_module::EqInvCipher(void)
 		if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr - round) << "].ik_sch" << "\t"; this->print_keyschedule_string(this->_altkeyschedule,round); }
 		this->AddRoundKey(this->_altkeyschedule,this->_state,round);
 	}
-	
+
 	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].istart" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
 	this->InvSubBytes();
 	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].is_box" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
@@ -364,7 +364,7 @@ void AES_module::MixColumns(std::vector<std::vector<byte>> &_state)
 		for (uint8_t r = 0x00; r < 0x04; r++)
 		{
 			_state[r][c] = ( a[0] * state[0][c] ) + ( a[1] * state[1][c] ) + ( a[2] * state[2][c] ) + ( a[3] * state[3][c] );
-			
+
 			std::rotate(a.rbegin(),a.rbegin()+1,a.rend());
 		}
 	}
@@ -383,7 +383,7 @@ void AES_module::InvMixColumns(std::vector<std::vector<byte>> &_state)
 		for (uint8_t r = 0x00; r < 0x04; r++)
 		{
 			_state[r][c] = ( a[0] * state[0][c] ) + ( a[1] * state[1][c] ) + ( a[2] * state[2][c] ) + ( a[3] * state[3][c] );
-			
+
 			std::rotate(a.rbegin(),a.rbegin()+1,a.rend());
 		}
 	}
@@ -401,7 +401,7 @@ void AES_module::KeyExpansion(void)
 		{
 			this->_keyschedule[i] = { this->_key[4*i] , this->_key[4*i+1] , this->_key[4*i+2] , this->_key[4*i+3] };
 		}
-		
+
 		std::vector<byte> temp;
 
 		for (uint8_t i = this->Nk; i < this->Nb*(this->Nr+1); i++)
@@ -533,21 +533,21 @@ void AES_module::test_standard(void)
 	{
 		case AES_standard::AES128:
 			std::cout << "AES-128 (NIST FIPS 197, Appendix C.1)" << std::endl;
-		
+
 			//keyword = { byte(0x2b) , byte(0x7e) , byte(0x15) , byte(0x16) , byte(0x28) , byte(0xae) , byte(0xd2) , byte(0xa6) , byte(0xab) , byte(0xf7) , byte(0x15) , byte(0x88) , byte(0x09) , byte(0xcf) , byte(0x4f) , byte(0x3c) };
 			keyword = { byte(0x00) , byte(0x01) , byte(0x02) , byte(0x03) , byte(0x04) , byte(0x05) , byte(0x06) , byte(0x07) , byte(0x08) , byte(0x09) , byte(0x0a) , byte(0x0b) , byte(0x0c) , byte(0x0d) , byte(0x0e) , byte(0x0f) };
 
 			break;
 		case AES_standard::AES192:
 			std::cout << "AES-192 (NIST FIPS 197, Appendix C.2)" << std::endl;
-		
+
 			//keyword = { byte(0x8e) , byte(0x73) , byte(0xb0) , byte(0xf7) , byte(0xda) , byte(0x0e) , byte(0x64) , byte(0x52) , byte(0xc8) , byte(0x10) , byte(0xf3) , byte(0x2b) , byte(0x80) , byte(0x90) , byte(0x79) , byte(0xe5) , byte(0x62) , byte(0xf8) , byte(0xea) , byte(0xd2) , byte(0x52) , byte(0x2c) , byte(0x6b) , byte(0x7b) };
 			keyword = { byte(0x00) , byte(0x01) , byte(0x02) , byte(0x03) , byte(0x04) , byte(0x05) , byte(0x06) , byte(0x07) , byte(0x08) , byte(0x09) , byte(0x0a) , byte(0x0b) , byte(0x0c) , byte(0x0d) , byte(0x0e) , byte(0x0f) , byte(0x10) , byte(0x11) , byte(0x12) , byte(0x13) , byte(0x14) , byte(0x15) , byte(0x16) , byte(0x17) };
 
 			break;
 		case AES_standard::AES256:
 			std::cout << "AES-256 (NIST FIPS 197, Appendix C.3)" << std::endl;
-		
+
 			//keyword = { byte(0x60) , byte(0x3d) , byte(0xeb) , byte(0x10) , byte(0x15) , byte(0xca) , byte(0x71) , byte(0xbe) , byte(0x2b) , byte(0x73) , byte(0xae) , byte(0xf0) , byte(0x85) , byte(0x7d) , byte(0x77) , byte(0x81) , byte(0x1f) , byte(0x35) , byte(0x2c) , byte(0x07) , byte(0x3b) , byte(0x61) , byte(0x08) , byte(0xd7) , byte(0x2d) , byte(0x98) , byte(0x10) , byte(0xa3) , byte(0x09) , byte(0x14) , byte(0xdf) , byte(0xf4) };
 			keyword = { byte(0x00) , byte(0x01) , byte(0x02) , byte(0x03) , byte(0x04) , byte(0x05) , byte(0x06) , byte(0x07) , byte(0x08) , byte(0x09) , byte(0x0a) , byte(0x0b) , byte(0x0c) , byte(0x0d) , byte(0x0e) , byte(0x0f) , byte(0x10) , byte(0x11) , byte(0x12) , byte(0x13) , byte(0x14) , byte(0x15) , byte(0x16) , byte(0x17) , byte(0x18) , byte(0x19) , byte(0x1a) , byte(0x1b) , byte(0x1c) , byte(0x1d) , byte(0x1e) , byte(0x1f) };
 

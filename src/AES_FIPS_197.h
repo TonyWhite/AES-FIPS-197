@@ -1,22 +1,16 @@
 #ifndef _AES_MODULE_H
 #define _AES_MODULE_H
 
-#include <iostream>
-#include <iomanip>
-
+#include "byte.h"
+#include <algorithm>
+#include <array>
+#include <bitset>
 #include <cstdint>
-
+#include <iomanip>
+#include <iostream>
+#include <stdexcept> // DEPRECATED
 #include <string>
 #include <vector>
-#include <array>
-
-#include <algorithm>
-
-#include <bitset>
-
-#include "byte.hpp"
-
-#include <stdexcept>
 
 enum class AES_standard { AES128, AES192, AES256 };
 

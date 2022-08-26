@@ -1,4 +1,4 @@
-#include "byte.hpp"
+#include "byte.h"
 
 std::vector<uint8_t> byte::_exp_table = std::vector<uint8_t>(0x00);
 std::vector<uint8_t> byte::_log_table = std::vector<uint8_t>(0x00);
@@ -107,7 +107,7 @@ bool byte::operator!=(const byte &X)
 
 byte byte::inverse(void)
 {
-	// return this->_byte != 0 ? byte( _exp_table[ ( 0xff ^ _log_table[this->_byte] ) % 0xff ] ) : byte(0x00); 
+	// return this->_byte != 0 ? byte( _exp_table[ ( 0xff ^ _log_table[this->_byte] ) % 0xff ] ) : byte(0x00);
 	return this->_byte != 0 ? byte(_exp_table.at(0xff ^ _log_table.at(this->_byte))) : byte(0x00);
 }
 

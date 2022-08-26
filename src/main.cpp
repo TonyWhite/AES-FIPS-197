@@ -1,4 +1,4 @@
-#include "AES_module.hpp"
+#include "AES_FIPS_197.h"
 #include "SimpleCypher.h"
 
 int main(void)
@@ -18,8 +18,8 @@ int main(void)
 	//AES_module AES256 = AES_module(AES_standard::AES256);
 	//AES256.test_standard();
 
-	std::string secret = "Hello, Universe!";
-  std::string password = "3 is meglio che Uan & Ambrogio.";
+	std::string secret = "Hello, Universe!";                    // 16 Bytes
+  std::string password = "3 is meglio che Uan & Ambrogio!!";  // 32 Bytes
   std::string encrypted;
   SimpleCypher::encrypt(&secret, &password, &encrypted);
 

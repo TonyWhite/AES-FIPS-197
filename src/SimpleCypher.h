@@ -1,7 +1,7 @@
 /*
 SIMPLE ENCRYPT/DECRYPT
 Auto padding data
-Force use AES Rijndael 256 bit
+Force standard using AES 256 bit
 IV from key
 */
 
