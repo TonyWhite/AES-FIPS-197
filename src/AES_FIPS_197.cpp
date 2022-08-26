@@ -270,12 +270,13 @@ void AES_module::InvCipher(void)
 	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].ioutput" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
 }
 
-void AES_module::EqInvCipher(void)
+/*void AES_module::EqInvCipher(void) // DEPRECATED
 {
 
 	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(0) << "].iinput" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
 
-	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(0) << "].ik_sch" << "\t"; this->print_keyschedule_string(this->_altkeyschedule,this->Nr); }
+	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(0) << "].ik_sch" << "\t"; this->print_keyschedule_string(this
+		,this->Nr); }
 	this->AddRoundKey(this->_altkeyschedule,this->_state,this->Nr);
 
 	for (uint8_t round = this->Nr - 1; round > 0; round--)
@@ -305,7 +306,8 @@ void AES_module::EqInvCipher(void)
 	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].ioutput" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
 
 	//std::cout << "> EqInvCipher() is not supported." << std::endl;
-}
+}*/
+
 
 void AES_module::SubBytes(std::vector<std::vector<byte>> &_state)
 {
@@ -421,7 +423,7 @@ void AES_module::KeyExpansion(void)
 
 		}
 
-		this->KeyExpansionAddendum();
+		//this->KeyExpansionAddendum(); // DEPRECATED
 
 
 	}
@@ -431,7 +433,7 @@ void AES_module::KeyExpansion(void)
 	}
 }
 
-void AES_module::KeyExpansionAddendum(void)
+/*void AES_module::KeyExpansionAddendum(void) // DEPRECATED
 {
 	this->_altkeyschedule = this->_keyschedule;
 
@@ -468,7 +470,7 @@ void AES_module::KeyExpansionAddendum(void)
 	//{
 	//	this->print_word(this->_altkeyschedule[i]); std::cout << std::endl;
 	//}
-}
+}*/
 
 void AES_module::AddRoundKey(const std::vector<std::vector<byte>> &_keyschedule, std::vector<std::vector<byte>> &_state,uint8_t round)
 {
@@ -585,10 +587,10 @@ void AES_module::test_standard(void)
 	this->InvCipher();
 	std::cout << std::endl;
 
-	std::cout << "EQUIVALENT INVERSE CIPHER (DECRYPT):" << std::endl;
-	this->_state = _enc_state;
-	this->EqInvCipher();
-	std::cout << std::endl;
+	//std::cout << "EQUIVALENT INVERSE CIPHER (DECRYPT):" << std::endl; // DEPRECATED
+	//this->_state = _enc_state;
+	//this->EqInvCipher();
+	//std::cout << std::endl;
 
 	this->verbose = _verbose;
 }

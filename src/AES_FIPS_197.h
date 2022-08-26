@@ -60,7 +60,7 @@ private:
 	void AddRoundKey(uint8_t);
 
 	void KeyExpansion(void);
-	void KeyExpansionAddendum(void);
+	//void KeyExpansionAddendum(void); // DEPRECATED
 
 	void InvSubBytes(std::vector<std::vector<byte>>&);
 	void InvShiftRows(std::vector<std::vector<byte>>&);
@@ -77,7 +77,7 @@ private:
 
 	void Cipher(void);
 	void InvCipher(void);
-	void EqInvCipher(void);
+	//void EqInvCipher(void); // DEPRECATED
 
 	void print_state(const std::vector<std::vector<byte>>&) const;
 	void print_word(const std::vector<byte>&) const;
