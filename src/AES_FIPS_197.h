@@ -1,5 +1,5 @@
-#ifndef _AES_MODULE_H
-#define _AES_MODULE_H
+#ifndef _AES_FIPS_197_H
+#define _AES_FIPS_197_H
 
 #include "byte.h"
 #include <algorithm>
@@ -14,12 +14,12 @@
 
 enum class AES_standard { AES128, AES192, AES256 };
 
-class AES_module
+class AES_FIPS_197
 {
 
 public:
-	AES_module(AES_standard);
-	~AES_module();
+	AES_FIPS_197(AES_standard);
+	~AES_FIPS_197();
 
 private:
 	void initialize(void);

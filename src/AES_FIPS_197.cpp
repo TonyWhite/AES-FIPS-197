@@ -1,11 +1,11 @@
 #include "AES_FIPS_197.h"
 
-bool AES_module::verbose = false;
+bool AES_FIPS_197::verbose = false;
 
-std::vector<uint8_t> AES_module::_sbox = std::vector<uint8_t>(0x00);
-std::vector<uint8_t> AES_module::_invsbox = std::vector<uint8_t>(0x00);
+std::vector<uint8_t> AES_FIPS_197::_sbox = std::vector<uint8_t>(0x00);
+std::vector<uint8_t> AES_FIPS_197::_invsbox = std::vector<uint8_t>(0x00);
 
-void AES_module::initialize(void)
+void AES_FIPS_197::initialize(void)
 {
 
 	if (this->_sbox.size() == 0)
@@ -53,7 +53,7 @@ void AES_module::initialize(void)
 	}
 }
 
-AES_module::AES_module(AES_standard standard)
+AES_FIPS_197::AES_FIPS_197(AES_standard standard)
 {
 	this->_standard = standard;
 
@@ -70,15 +70,15 @@ AES_module::AES_module(AES_standard standard)
 			break;
 	}
 
-	AES_module::initialize();
+	AES_FIPS_197::initialize();
 }
 
-AES_module::~AES_module()
+AES_FIPS_197::~AES_FIPS_197()
 {
 
 }
 
-void AES_module::print_state(const std::vector<std::vector<byte>> &_state) const
+void AES_FIPS_197::print_state(const std::vector<std::vector<byte>> &_state) const
 {
 	std::cout << "╓" << std::string(5 * this->Nb + 2, ' ') << "╖" << std::endl;
 
@@ -97,9 +97,9 @@ void AES_module::print_state(const std::vector<std::vector<byte>> &_state) const
 	std::cout << std::endl;
 }
 
-void AES_module::print_state(void) const { AES_module::print_state(this->_state); }
+void AES_FIPS_197::print_state(void) const { AES_FIPS_197::print_state(this->_state); }
 
-void AES_module::print_word(const std::vector<byte> &word) const
+void AES_FIPS_197::print_word(const std::vector<byte> &word) const
 {
 	for (uint8_t i = 0x00; i < word.size(); i++)
 	{
@@ -107,7 +107,7 @@ void AES_module::print_word(const std::vector<byte> &word) const
 	}
 }
 
-void AES_module::print_keyschedule_string(const std::vector<std::vector<byte>> &_keyschedule,const uint8_t &round) const
+void AES_FIPS_197::print_keyschedule_string(const std::vector<std::vector<byte>> &_keyschedule,const uint8_t &round) const
 {
 	for (uint8_t c = 0x00; c < this->Nb; c++)
 	{
@@ -119,9 +119,9 @@ void AES_module::print_keyschedule_string(const std::vector<std::vector<byte>> &
 	std::cout << std::endl;
 }
 
-void AES_module::print_keyschedule_string(const uint8_t &round) const { AES_module::print_keyschedule_string(this->_keyschedule,round); }
+void AES_FIPS_197::print_keyschedule_string(const uint8_t &round) const { AES_FIPS_197::print_keyschedule_string(this->_keyschedule,round); }
 
-void AES_module::print_bytetable(const std::vector<uint8_t> &bytemap) const
+void AES_FIPS_197::print_bytetable(const std::vector<uint8_t> &bytemap) const
 {
 	if(bytemap.size() == 0xff + 1)
 	{
@@ -150,7 +150,7 @@ void AES_module::print_bytetable(const std::vector<uint8_t> &bytemap) const
 	}
 }
 
-void AES_module::print_keyschedule(const std::vector<std::vector<byte>> &_keyschedule) const
+void AES_FIPS_197::print_keyschedule(const std::vector<std::vector<byte>> &_keyschedule) const
 {
 
 	for (uint8_t i = 0x00; i < _keyschedule.size(); i++)
@@ -168,9 +168,9 @@ void AES_module::print_keyschedule(const std::vector<std::vector<byte>> &_keysch
 	std::cout << std::endl;
 }
 
-void AES_module::print_keyschedule(void) const { AES_module::print_keyschedule(this->_keyschedule); }
+void AES_FIPS_197::print_keyschedule(void) const { AES_FIPS_197::print_keyschedule(this->_keyschedule); }
 
-std::vector<std::vector<byte>> AES_module::to_state(const std::vector<byte> &word) const
+std::vector<std::vector<byte>> AES_FIPS_197::to_state(const std::vector<byte> &word) const
 {
 	std::vector<std::vector<byte>> state = std::vector<std::vector<byte>>(4);
 	for (uint8_t r = 0x00; r < 0x04; r++)
@@ -186,7 +186,7 @@ std::vector<std::vector<byte>> AES_module::to_state(const std::vector<byte> &wor
 	return state;
 }
 
-std::vector<byte> AES_module::to_word(const std::vector<std::vector<byte>> &state) const
+std::vector<byte> AES_FIPS_197::to_word(const std::vector<std::vector<byte>> &state) const
 {
 	std::vector<byte> word = std::vector<byte>(4 * this->Nb);
 	for (uint8_t r = 0x00; r < 0x04; r++)
@@ -200,7 +200,7 @@ std::vector<byte> AES_module::to_word(const std::vector<std::vector<byte>> &stat
 	return word;
 }
 
-void AES_module::Cipher(void)
+void AES_FIPS_197::Cipher(void)
 {
 
 	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(0) << "].input" << "\t\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
@@ -235,7 +235,7 @@ void AES_module::Cipher(void)
 	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].output" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
 }
 
-void AES_module::InvCipher(void)
+void AES_FIPS_197::InvCipher(void)
 {
 
 	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(0) << "].iinput" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
@@ -270,7 +270,7 @@ void AES_module::InvCipher(void)
 	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(this->Nr) << "].ioutput" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
 }
 
-/*void AES_module::EqInvCipher(void) // DEPRECATED
+/*void AES_FIPS_197::EqInvCipher(void) // DEPRECATED
 {
 
 	if( this->verbose ) { std::cout << "round[" << std::right << std::setw(2) << std::setfill(' ') << std::dec << (int)(0) << "].iinput" << "\t"; this->print_word(this->to_word(this->_state)); std::cout << std::endl; }
@@ -309,7 +309,7 @@ void AES_module::InvCipher(void)
 }*/
 
 
-void AES_module::SubBytes(std::vector<std::vector<byte>> &_state)
+void AES_FIPS_197::SubBytes(std::vector<std::vector<byte>> &_state)
 {
 	for (uint8_t r = 0x00; r < 0x04; r++)
 	{
@@ -320,9 +320,9 @@ void AES_module::SubBytes(std::vector<std::vector<byte>> &_state)
 	}
 }
 
-void AES_module::SubBytes(void) { AES_module::SubBytes(this->_state); }
+void AES_FIPS_197::SubBytes(void) { AES_FIPS_197::SubBytes(this->_state); }
 
-void AES_module::InvSubBytes(std::vector<std::vector<byte>> &_state)
+void AES_FIPS_197::InvSubBytes(std::vector<std::vector<byte>> &_state)
 {
 	for (uint8_t r = 0x00; r < 0x04; r++)
 	{
@@ -333,9 +333,9 @@ void AES_module::InvSubBytes(std::vector<std::vector<byte>> &_state)
 	}
 }
 
-void AES_module::InvSubBytes(void) { AES_module::InvSubBytes(this->_state); }
+void AES_FIPS_197::InvSubBytes(void) { AES_FIPS_197::InvSubBytes(this->_state); }
 
-void AES_module::ShiftRows(std::vector<std::vector<byte>> &_state)
+void AES_FIPS_197::ShiftRows(std::vector<std::vector<byte>> &_state)
 {
 	for (uint8_t r = 0x00; r < 0x04; r++)
 	{
@@ -343,9 +343,9 @@ void AES_module::ShiftRows(std::vector<std::vector<byte>> &_state)
 	}
 }
 
-void AES_module::ShiftRows(void) { AES_module::ShiftRows(this->_state); }
+void AES_FIPS_197::ShiftRows(void) { AES_FIPS_197::ShiftRows(this->_state); }
 
-void AES_module::InvShiftRows(std::vector<std::vector<byte>> &_state)
+void AES_FIPS_197::InvShiftRows(std::vector<std::vector<byte>> &_state)
 {
 	for (uint8_t r = 0x00; r < 0x04; r++)
 	{
@@ -353,9 +353,9 @@ void AES_module::InvShiftRows(std::vector<std::vector<byte>> &_state)
 	}
 }
 
-void AES_module::InvShiftRows(void) { AES_module::InvShiftRows(this->_state); }
+void AES_FIPS_197::InvShiftRows(void) { AES_FIPS_197::InvShiftRows(this->_state); }
 
-void AES_module::MixColumns(std::vector<std::vector<byte>> &_state)
+void AES_FIPS_197::MixColumns(std::vector<std::vector<byte>> &_state)
 {
 	std::vector<std::vector<byte>> state = _state;
 
@@ -372,9 +372,9 @@ void AES_module::MixColumns(std::vector<std::vector<byte>> &_state)
 	}
 }
 
-void AES_module::MixColumns(void) { AES_module::MixColumns(this->_state); }
+void AES_FIPS_197::MixColumns(void) { AES_FIPS_197::MixColumns(this->_state); }
 
-void AES_module::InvMixColumns(std::vector<std::vector<byte>> &_state)
+void AES_FIPS_197::InvMixColumns(std::vector<std::vector<byte>> &_state)
 {
 	std::vector<std::vector<byte>> state = _state;
 
@@ -391,9 +391,9 @@ void AES_module::InvMixColumns(std::vector<std::vector<byte>> &_state)
 	}
 }
 
-void AES_module::InvMixColumns(void) { AES_module::InvMixColumns(this->_state); }
+void AES_FIPS_197::InvMixColumns(void) { AES_FIPS_197::InvMixColumns(this->_state); }
 
-void AES_module::KeyExpansion(void)
+void AES_FIPS_197::KeyExpansion(void)
 {
 	this->_keyschedule = std::vector<std::vector<byte>>(this->Nb*(this->Nr+1));
 
@@ -433,7 +433,7 @@ void AES_module::KeyExpansion(void)
 	}
 }
 
-/*void AES_module::KeyExpansionAddendum(void) // DEPRECATED
+/*void AES_FIPS_197::KeyExpansionAddendum(void) // DEPRECATED
 {
 	this->_altkeyschedule = this->_keyschedule;
 
@@ -472,7 +472,7 @@ void AES_module::KeyExpansion(void)
 	//}
 }*/
 
-void AES_module::AddRoundKey(const std::vector<std::vector<byte>> &_keyschedule, std::vector<std::vector<byte>> &_state,uint8_t round)
+void AES_FIPS_197::AddRoundKey(const std::vector<std::vector<byte>> &_keyschedule, std::vector<std::vector<byte>> &_state,uint8_t round)
 {
 	for (uint8_t c = 0x00; c < this->Nb; c++)
 	{
@@ -483,9 +483,9 @@ void AES_module::AddRoundKey(const std::vector<std::vector<byte>> &_keyschedule,
 	}
 }
 
-void AES_module::AddRoundKey(uint8_t round) { AES_module::AddRoundKey(this->_keyschedule,this->_state,round); }
+void AES_FIPS_197::AddRoundKey(uint8_t round) { AES_FIPS_197::AddRoundKey(this->_keyschedule,this->_state,round); }
 
-std::vector<byte> AES_module::SubWord(const std::vector<byte> &word) const
+std::vector<byte> AES_FIPS_197::SubWord(const std::vector<byte> &word) const
 {
 	std::vector<byte> sub_word = word;
 
@@ -497,7 +497,7 @@ std::vector<byte> AES_module::SubWord(const std::vector<byte> &word) const
 	return sub_word;
 }
 
-std::vector<byte> AES_module::XorWord(const std::vector<byte> &word1,const std::vector<byte> &word2) const
+std::vector<byte> AES_FIPS_197::XorWord(const std::vector<byte> &word1,const std::vector<byte> &word2) const
 {
 	std::vector<byte> xor_word = word1;
 
@@ -514,7 +514,7 @@ std::vector<byte> AES_module::XorWord(const std::vector<byte> &word1,const std::
 	return xor_word;
 }
 
-std::vector<byte> AES_module::RotWord(const std::vector<byte> &word) const
+std::vector<byte> AES_FIPS_197::RotWord(const std::vector<byte> &word) const
 {
 	std::vector<byte> rot_word = word;
 
@@ -523,7 +523,7 @@ std::vector<byte> AES_module::RotWord(const std::vector<byte> &word) const
 	return rot_word;
 }
 
-void AES_module::test_standard(void)
+void AES_FIPS_197::test_standard(void)
 {
 
 	std::vector<byte> keyword;
@@ -595,7 +595,7 @@ void AES_module::test_standard(void)
 	this->verbose = _verbose;
 }
 
-void AES_module::set_key(const std::vector<byte> &word)
+void AES_FIPS_197::set_key(const std::vector<byte> &word)
 {
 	this->_key = {};
 
@@ -610,7 +610,7 @@ void AES_module::set_key(const std::vector<byte> &word)
 	}
 }
 
-std::vector<byte> AES_module::encrypt(const std::vector<byte> &word)
+std::vector<byte> AES_FIPS_197::encrypt(const std::vector<byte> &word)
 {
 	if (word.size() == 4 * this->Nb)
 	{
@@ -626,7 +626,7 @@ std::vector<byte> AES_module::encrypt(const std::vector<byte> &word)
 	}
 }
 
-std::vector<byte> AES_module::decrypt(const std::vector<byte> &word)
+std::vector<byte> AES_FIPS_197::decrypt(const std::vector<byte> &word)
 {
 	if (word.size() == 4 * this->Nb)
 	{
