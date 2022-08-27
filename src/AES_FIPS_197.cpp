@@ -502,10 +502,10 @@ std::vector<byte> AES_module::XorWord(const std::vector<byte> &word1,const std::
 	std::vector<byte> xor_word = word1;
 
 	if (word1.size() == word2.size())
-		for (uint8_t i = 0x00; i < xor_word.size(); i++)
-		{
-			xor_word[i] = xor_word[i] + word2[i];
-		}
+	for (uint8_t i = 0x00; i < xor_word.size(); i++)
+	{
+		xor_word[i] = xor_word[i] + word2[i];
+	}
 	else
 	{
 		throw;

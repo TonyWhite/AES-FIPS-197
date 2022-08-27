@@ -19,9 +19,9 @@ int main(void)
 	//AES256.test_standard();
 
 	std::string secret = "Hello, Universe!";                    // 16 Bytes
-  std::string password = "3 is meglio che Uan & Ambrogio!!";  // 32 Bytes
-  std::string encrypted;
-  SimpleCypher::encrypt(&secret, &password, &encrypted);
+	std::string password = "3 is meglio che Uan & Ambrogio!!";  // 32 Bytes
+	std::string encrypted;
+	SimpleCypher::encrypt(&secret, &password, &encrypted);
 
 	return 0;
 }
