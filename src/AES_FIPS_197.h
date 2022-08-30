@@ -1,7 +1,6 @@
 #ifndef _AES_FIPS_197_H
 #define _AES_FIPS_197_H
 
-#include "byte.h"
 #include <algorithm>
 #include <array>
 #include <bitset>
@@ -33,59 +32,64 @@ private:
 	static std::vector<uint8_t> _sbox;
 	static std::vector<uint8_t> _invsbox;
 
+	static std::vector<uint8_t> _exp_table;
+	static std::vector<uint8_t> _log_table;
+
 	static bool verbose;
 
-	std::vector<std::vector<byte>> _state;
+	std::vector<std::vector<uint8_t>> _state;
 
-	std::vector<std::vector<byte>> _rcon;
+	std::vector<std::vector<uint8_t>> _rcon;
 
-	std::vector<byte> _key;
-	std::vector<std::vector<byte>> _keyschedule;
-	std::vector<std::vector<byte>> _altkeyschedule;
+	std::vector<uint8_t> _key;
+	std::vector<std::vector<uint8_t>> _keyschedule;
+	std::vector<std::vector<uint8_t>> _altkeyschedule;
 
-	std::vector<std::vector<byte>> to_state(const std::vector<byte>&) const;
-	std::vector<byte> to_word(const std::vector<std::vector<byte>>&) const;
+	std::vector<std::vector<uint8_t>> to_state(const std::vector<uint8_t>&) const;
+	std::vector<uint8_t> to_word(const std::vector<std::vector<uint8_t>>&) const;
+
+	uint8_t xtime(const uint8_t &);
 
 
-	void SubBytes(std::vector<std::vector<byte>>&);
-	void ShiftRows(std::vector<std::vector<byte>>&);
-	void MixColumns(std::vector<std::vector<byte>>&);
+	void SubBytes(std::vector<std::vector<uint8_t>>&);
+	void ShiftRows(std::vector<std::vector<uint8_t>>&);
+	void MixColumns(std::vector<std::vector<uint8_t>>&);
 
 	void SubBytes(void);
 	void ShiftRows(void);
 	void MixColumns(void);
 
-	void AddRoundKey(const std::vector<std::vector<byte>>&,std::vector<std::vector<byte>>&,uint8_t);
+	void AddRoundKey(const std::vector<std::vector<uint8_t>>&,std::vector<std::vector<uint8_t>>&,uint8_t);
 
 	void AddRoundKey(uint8_t);
 
 	void KeyExpansion(void);
 	//void KeyExpansionAddendum(void); // DEPRECATED
 
-	void InvSubBytes(std::vector<std::vector<byte>>&);
-	void InvShiftRows(std::vector<std::vector<byte>>&);
-	void InvMixColumns(std::vector<std::vector<byte>>&);
+	void InvSubBytes(std::vector<std::vector<uint8_t>>&);
+	void InvShiftRows(std::vector<std::vector<uint8_t>>&);
+	void InvMixColumns(std::vector<std::vector<uint8_t>>&);
 
 	void InvSubBytes(void);
 	void InvShiftRows(void);
 	void InvMixColumns(void);
 
-	std::vector<byte> SubWord(const std::vector<byte>&) const;
-	std::vector<byte> RotWord(const std::vector<byte>&) const;
+	std::vector<uint8_t> SubWord(const std::vector<uint8_t>&) const;
+	std::vector<uint8_t> RotWord(const std::vector<uint8_t>&) const;
 
-	std::vector<byte> XorWord(const std::vector<byte>&,const std::vector<byte>&) const;
+	std::vector<uint8_t> XorWord(const std::vector<uint8_t>&,const std::vector<uint8_t>&) const;
 
 	void Cipher(void);
 	void InvCipher(void);
 	//void EqInvCipher(void); // DEPRECATED
 
-	void print_state(const std::vector<std::vector<byte>>&) const;
-	void print_word(const std::vector<byte>&) const;
+	void print_state(const std::vector<std::vector<uint8_t>>&) const;
+	void print_word(const std::vector<uint8_t>&) const;
 
 	void print_state(void) const;
 
-	void print_keyschedule_string(const std::vector<std::vector<byte>>&,const uint8_t&) const;
-	void print_keyschedule(const std::vector<std::vector<byte>>&) const;
+	void print_keyschedule_string(const std::vector<std::vector<uint8_t>>&,const uint8_t&) const;
+	void print_keyschedule(const std::vector<std::vector<uint8_t>>&) const;
 
 	void print_keyschedule_string(const uint8_t&) const;
 	void print_keyschedule(void) const;
@@ -93,10 +97,10 @@ private:
 	void print_bytetable(const std::vector<uint8_t>&) const;
 
 public:
-	std::vector<byte> encrypt(const std::vector<byte>&);
-	std::vector<byte> decrypt(const std::vector<byte>&);
+	std::vector<uint8_t> encrypt(const std::vector<uint8_t>&);
+	std::vector<uint8_t> decrypt(const std::vector<uint8_t>&);
 
-	void set_key(const std::vector<byte>&);
+	void set_key(const std::vector<uint8_t>&);
 
 	void test_standard(void);
 

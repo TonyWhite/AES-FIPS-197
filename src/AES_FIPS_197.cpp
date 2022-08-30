@@ -4,16 +4,31 @@ bool AES_FIPS_197::verbose = false;
 
 std::vector<uint8_t> AES_FIPS_197::_sbox = std::vector<uint8_t>(0x00);
 std::vector<uint8_t> AES_FIPS_197::_invsbox = std::vector<uint8_t>(0x00);
+std::vector<uint8_t> AES_FIPS_197::_exp_table = std::vector<uint8_t>(0xff + 1);
+std::vector<uint8_t> AES_FIPS_197::_log_table = std::vector<uint8_t>(0xff + 1);
 
 void AES_FIPS_197::initialize(void)
 {
+	// init exp_table and log_table
+	if (this->_exp_table.size() == 0)
+	{
+		this->_exp_table.at(0) = 0x01;
+		this->_log_table.at(0) = 0x00;
 
+		for (uint16_t j = 0x01; j <= 0xff; j++)
+		{
+			this->_exp_table.at(j) = xtime(this->_exp_table.at(j - 1)) ^ this->_exp_table.at(j - 1);
+			this->_log_table.at(this->_exp_table.at(j)) = (uint8_t)(j % 0xff);
+		}
+	}
+
+	// init _sbox and _invsbox
 	if (this->_sbox.size() == 0)
 	{
 		this->_sbox = std::vector<uint8_t>(0xff + 1);
 		this->_invsbox = std::vector<uint8_t>(0xff + 1);
 
-		byte _X;
+		uint8_t _X;
 		std::bitset<8> _x;
 		std::bitset<8> _b;
 
@@ -21,10 +36,10 @@ void AES_FIPS_197::initialize(void)
 
 		for (uint16_t j = 0x00; j <= 0xff; j++)
 		{
-			_X = byte(j);
-			_X = _X.inverse();
+			_X = uint8_t(j);
+			_X = _X != 0 ? uint8_t(_exp_table.at(0xff ^ _log_table.at(0x00))) : uint8_t(0x00);
 
-			_x = _X.to_bitset();
+			_x = std::bitset<8>(_X);
 
 			for (uint8_t i = 0x00; i < 0x08; i++)
 			{
@@ -34,23 +49,24 @@ void AES_FIPS_197::initialize(void)
 			this->_sbox[j] = (uint8_t)_b.to_ulong();
 			this->_invsbox[(int)this->_sbox[j]] = (uint8_t)j;
 		}
-
-		// this->print_bytetable(this->_sbox);
-		// this->print_bytetable(this->_invsbox);
-
 	}
 
 	{
-		this->_rcon = std::vector<std::vector<byte>>((this->Nb*(this->Nr+1)-1)/this->Nk);
+		this->_rcon = std::vector<std::vector<uint8_t>>((this->Nb*(this->Nr+1)-1)/this->Nk);
 
-		this->_rcon[0] = { byte(0x01) , byte(0x00) , byte(0x00) , byte(0x00) };
+		this->_rcon[0] = { uint8_t(0x01) , uint8_t(0x00) , uint8_t(0x00) , uint8_t(0x00) };
 
 		for (uint16_t i = 0x01; i < this->_rcon.size(); i++)
 		{
-			this->_rcon[i] = { this->_rcon[i-1][0] * byte(0x02) , byte(0x00) , byte(0x00) , byte(0x00) };
+			this->_rcon[i] = { uint8_t(this->_rcon[i-1][0] * uint8_t(0x02)) , uint8_t(0x00) , uint8_t(0x00) , uint8_t(0x00) };
 		}
 
 	}
+}
+
+uint8_t AES_FIPS_197::xtime(const uint8_t &value)
+{
+	return (value >> 7 & 0x01) ? (value << 1 ^ 0x1b) : value << 1;
 }
 
 AES_FIPS_197::AES_FIPS_197(AES_standard standard)
@@ -78,7 +94,7 @@ AES_FIPS_197::~AES_FIPS_197()
 
 }
 
-void AES_FIPS_197::print_state(const std::vector<std::vector<byte>> &_state) const
+void AES_FIPS_197::print_state(const std::vector<std::vector<uint8_t>> &_state) const
 {
 	std::cout << "╓" << std::string(5 * this->Nb + 2, ' ') << "╖" << std::endl;
 
@@ -88,7 +104,7 @@ void AES_FIPS_197::print_state(const std::vector<std::vector<byte>> &_state) con
 
 		for (uint8_t c = 0x00; c < this->Nb; c++)
 		{
-			std::cout << std::right << std::setw(3) << std::setfill(' ') << "" << std::right << std::setw(2) << std::setfill('0') << std::hex << (int)(_state[r][c].to_uint8_t());
+			std::cout << std::right << std::setw(3) << std::setfill(' ') << "" << std::right << std::setw(2) << std::setfill('0') << std::hex << (int)(_state[r][c]);
 		}
 		std::cout << std::string(2, ' ') << "║" << std::endl;
 	}
@@ -99,21 +115,21 @@ void AES_FIPS_197::print_state(const std::vector<std::vector<byte>> &_state) con
 
 void AES_FIPS_197::print_state(void) const { AES_FIPS_197::print_state(this->_state); }
 
-void AES_FIPS_197::print_word(const std::vector<byte> &word) const
+void AES_FIPS_197::print_word(const std::vector<uint8_t> &word) const
 {
 	for (uint8_t i = 0x00; i < word.size(); i++)
 	{
-		std::cout << std::right << std::setw(2) << std::setfill('0') << std::hex << (int)(word[i].to_uint8_t());
+		std::cout << std::right << std::setw(2) << std::setfill('0') << std::hex << (int)(word[i]);
 	}
 }
 
-void AES_FIPS_197::print_keyschedule_string(const std::vector<std::vector<byte>> &_keyschedule,const uint8_t &round) const
+void AES_FIPS_197::print_keyschedule_string(const std::vector<std::vector<uint8_t>> &_keyschedule,const uint8_t &round) const
 {
 	for (uint8_t c = 0x00; c < this->Nb; c++)
 	{
 		for (uint8_t r = 0x00; r < 0x04; r++)
 		{
-			std::cout << std::right << std::setw(2) << std::setfill('0') << std::hex << (int)(_keyschedule[round*this->Nb+c][r].to_uint8_t());
+			std::cout << std::right << std::setw(2) << std::setfill('0') << std::hex << (int)(_keyschedule[round*this->Nb+c][r]);
 		}
 	}
 	std::cout << std::endl;
@@ -150,7 +166,7 @@ void AES_FIPS_197::print_bytetable(const std::vector<uint8_t> &bytemap) const
 	}
 }
 
-void AES_FIPS_197::print_keyschedule(const std::vector<std::vector<byte>> &_keyschedule) const
+void AES_FIPS_197::print_keyschedule(const std::vector<std::vector<uint8_t>> &_keyschedule) const
 {
 
 	for (uint8_t i = 0x00; i < _keyschedule.size(); i++)
@@ -160,7 +176,7 @@ void AES_FIPS_197::print_keyschedule(const std::vector<std::vector<byte>> &_keys
 		std::cout << std::right << std::setw(4) << std::setfill(' ') << "x";
 		for (uint8_t c = 0x00; c < this->Nb; c++)
 		{
-			std::cout << std::right << std::setw(2) << std::setfill('0') << std::hex << (int)(_keyschedule[i][c].to_uint8_t());
+			std::cout << std::right << std::setw(2) << std::setfill('0') << std::hex << (int)(_keyschedule[i][c]);
 		}
 		std::cout << std::endl;
 	}
@@ -170,12 +186,12 @@ void AES_FIPS_197::print_keyschedule(const std::vector<std::vector<byte>> &_keys
 
 void AES_FIPS_197::print_keyschedule(void) const { AES_FIPS_197::print_keyschedule(this->_keyschedule); }
 
-std::vector<std::vector<byte>> AES_FIPS_197::to_state(const std::vector<byte> &word) const
+std::vector<std::vector<uint8_t>> AES_FIPS_197::to_state(const std::vector<uint8_t> &word) const
 {
-	std::vector<std::vector<byte>> state = std::vector<std::vector<byte>>(4);
+	std::vector<std::vector<uint8_t>> state = std::vector<std::vector<uint8_t>>(4);
 	for (uint8_t r = 0x00; r < 0x04; r++)
 	{
-		state[r] = std::vector<byte>(this->Nb);
+		state[r] = std::vector<uint8_t>(this->Nb);
 
 		for (uint8_t c = 0x00; c < this->Nb; c++)
 		{
@@ -186,9 +202,9 @@ std::vector<std::vector<byte>> AES_FIPS_197::to_state(const std::vector<byte> &w
 	return state;
 }
 
-std::vector<byte> AES_FIPS_197::to_word(const std::vector<std::vector<byte>> &state) const
+std::vector<uint8_t> AES_FIPS_197::to_word(const std::vector<std::vector<uint8_t>> &state) const
 {
-	std::vector<byte> word = std::vector<byte>(4 * this->Nb);
+	std::vector<uint8_t> word = std::vector<uint8_t>(4 * this->Nb);
 	for (uint8_t r = 0x00; r < 0x04; r++)
 	{
 		for (uint8_t c = 0x00; c < this->Nb; c++)
@@ -309,33 +325,33 @@ void AES_FIPS_197::InvCipher(void)
 }*/
 
 
-void AES_FIPS_197::SubBytes(std::vector<std::vector<byte>> &_state)
+void AES_FIPS_197::SubBytes(std::vector<std::vector<uint8_t>> &_state)
 {
 	for (uint8_t r = 0x00; r < 0x04; r++)
 	{
 		for (uint8_t c = 0x00; c < this->Nb; c++)
 		{
-			_state[r][c] = byte(_sbox.at(_state[r][c].to_uint8_t()));
+			_state[r][c] = uint8_t(_sbox.at(_state[r][c]));
 		}
 	}
 }
 
 void AES_FIPS_197::SubBytes(void) { AES_FIPS_197::SubBytes(this->_state); }
 
-void AES_FIPS_197::InvSubBytes(std::vector<std::vector<byte>> &_state)
+void AES_FIPS_197::InvSubBytes(std::vector<std::vector<uint8_t>> &_state)
 {
 	for (uint8_t r = 0x00; r < 0x04; r++)
 	{
 		for (uint8_t c = 0x00; c < this->Nb; c++)
 		{
-			_state[r][c] = byte(_invsbox.at(_state[r][c].to_uint8_t()));
+			_state[r][c] = uint8_t(_invsbox.at(_state[r][c]));
 		}
 	}
 }
 
 void AES_FIPS_197::InvSubBytes(void) { AES_FIPS_197::InvSubBytes(this->_state); }
 
-void AES_FIPS_197::ShiftRows(std::vector<std::vector<byte>> &_state)
+void AES_FIPS_197::ShiftRows(std::vector<std::vector<uint8_t>> &_state)
 {
 	for (uint8_t r = 0x00; r < 0x04; r++)
 	{
@@ -345,7 +361,7 @@ void AES_FIPS_197::ShiftRows(std::vector<std::vector<byte>> &_state)
 
 void AES_FIPS_197::ShiftRows(void) { AES_FIPS_197::ShiftRows(this->_state); }
 
-void AES_FIPS_197::InvShiftRows(std::vector<std::vector<byte>> &_state)
+void AES_FIPS_197::InvShiftRows(std::vector<std::vector<uint8_t>> &_state)
 {
 	for (uint8_t r = 0x00; r < 0x04; r++)
 	{
@@ -355,11 +371,11 @@ void AES_FIPS_197::InvShiftRows(std::vector<std::vector<byte>> &_state)
 
 void AES_FIPS_197::InvShiftRows(void) { AES_FIPS_197::InvShiftRows(this->_state); }
 
-void AES_FIPS_197::MixColumns(std::vector<std::vector<byte>> &_state)
+void AES_FIPS_197::MixColumns(std::vector<std::vector<uint8_t>> &_state)
 {
-	std::vector<std::vector<byte>> state = _state;
+	std::vector<std::vector<uint8_t>> state = _state;
 
-	std::vector<byte> a = { byte(0x02) , byte(0x03) , byte(0x01) , byte(0x01) };
+	std::vector<uint8_t> a = { uint8_t(0x02) , uint8_t(0x03) , uint8_t(0x01) , uint8_t(0x01) };
 
 	for (uint8_t c = 0x00; c < this->Nb; c++)
 	{
@@ -374,11 +390,11 @@ void AES_FIPS_197::MixColumns(std::vector<std::vector<byte>> &_state)
 
 void AES_FIPS_197::MixColumns(void) { AES_FIPS_197::MixColumns(this->_state); }
 
-void AES_FIPS_197::InvMixColumns(std::vector<std::vector<byte>> &_state)
+void AES_FIPS_197::InvMixColumns(std::vector<std::vector<uint8_t>> &_state)
 {
-	std::vector<std::vector<byte>> state = _state;
+	std::vector<std::vector<uint8_t>> state = _state;
 
-	std::vector<byte> a = { byte(0x0e) , byte(0x0b) , byte(0x0d) , byte(0x09) };
+	std::vector<uint8_t> a = { uint8_t(0x0e) , uint8_t(0x0b) , uint8_t(0x0d) , uint8_t(0x09) };
 
 	for (uint8_t c = 0x00; c < this->Nb; c++)
 	{
@@ -395,7 +411,7 @@ void AES_FIPS_197::InvMixColumns(void) { AES_FIPS_197::InvMixColumns(this->_stat
 
 void AES_FIPS_197::KeyExpansion(void)
 {
-	this->_keyschedule = std::vector<std::vector<byte>>(this->Nb*(this->Nr+1));
+	this->_keyschedule = std::vector<std::vector<uint8_t>>(this->Nb*(this->Nr+1));
 
 	if(this->_key.size() == 4 * this->Nk)
 	{
@@ -404,7 +420,7 @@ void AES_FIPS_197::KeyExpansion(void)
 			this->_keyschedule[i] = { this->_key[4*i] , this->_key[4*i+1] , this->_key[4*i+2] , this->_key[4*i+3] };
 		}
 
-		std::vector<byte> temp;
+		std::vector<uint8_t> temp;
 
 		for (uint8_t i = this->Nk; i < this->Nb*(this->Nr+1); i++)
 		{
@@ -472,7 +488,7 @@ void AES_FIPS_197::KeyExpansion(void)
 	//}
 }*/
 
-void AES_FIPS_197::AddRoundKey(const std::vector<std::vector<byte>> &_keyschedule, std::vector<std::vector<byte>> &_state,uint8_t round)
+void AES_FIPS_197::AddRoundKey(const std::vector<std::vector<uint8_t>> &_keyschedule, std::vector<std::vector<uint8_t>> &_state,uint8_t round)
 {
 	for (uint8_t c = 0x00; c < this->Nb; c++)
 	{
@@ -485,21 +501,21 @@ void AES_FIPS_197::AddRoundKey(const std::vector<std::vector<byte>> &_keyschedul
 
 void AES_FIPS_197::AddRoundKey(uint8_t round) { AES_FIPS_197::AddRoundKey(this->_keyschedule,this->_state,round); }
 
-std::vector<byte> AES_FIPS_197::SubWord(const std::vector<byte> &word) const
+std::vector<uint8_t> AES_FIPS_197::SubWord(const std::vector<uint8_t> &word) const
 {
-	std::vector<byte> sub_word = word;
+	std::vector<uint8_t> sub_word = word;
 
 	for (uint8_t i = 0x00; i < word.size(); i++)
 	{
-		sub_word[i] = byte(_sbox.at(word[i].to_uint8_t()));
+		sub_word[i] = uint8_t(_sbox.at(word[i]));
 	}
 
 	return sub_word;
 }
 
-std::vector<byte> AES_FIPS_197::XorWord(const std::vector<byte> &word1,const std::vector<byte> &word2) const
+std::vector<uint8_t> AES_FIPS_197::XorWord(const std::vector<uint8_t> &word1,const std::vector<uint8_t> &word2) const
 {
-	std::vector<byte> xor_word = word1;
+	std::vector<uint8_t> xor_word = word1;
 
 	if (word1.size() == word2.size())
 	for (uint8_t i = 0x00; i < xor_word.size(); i++)
@@ -514,9 +530,9 @@ std::vector<byte> AES_FIPS_197::XorWord(const std::vector<byte> &word1,const std
 	return xor_word;
 }
 
-std::vector<byte> AES_FIPS_197::RotWord(const std::vector<byte> &word) const
+std::vector<uint8_t> AES_FIPS_197::RotWord(const std::vector<uint8_t> &word) const
 {
-	std::vector<byte> rot_word = word;
+	std::vector<uint8_t> rot_word = word;
 
 	std::rotate(rot_word.begin(),rot_word.begin()+1,rot_word.end());
 
@@ -526,7 +542,7 @@ std::vector<byte> AES_FIPS_197::RotWord(const std::vector<byte> &word) const
 void AES_FIPS_197::test_standard(void)
 {
 
-	std::vector<byte> keyword;
+	std::vector<uint8_t> keyword;
 
 	std::cout << std::endl << std::string( 80 , '*' ) << std::endl;
 	std::cout << " Example Vectors for ";
@@ -537,21 +553,21 @@ void AES_FIPS_197::test_standard(void)
 			std::cout << "AES-128 (NIST FIPS 197, Appendix C.1)" << std::endl;
 
 			//keyword = { byte(0x2b) , byte(0x7e) , byte(0x15) , byte(0x16) , byte(0x28) , byte(0xae) , byte(0xd2) , byte(0xa6) , byte(0xab) , byte(0xf7) , byte(0x15) , byte(0x88) , byte(0x09) , byte(0xcf) , byte(0x4f) , byte(0x3c) };
-			keyword = { byte(0x00) , byte(0x01) , byte(0x02) , byte(0x03) , byte(0x04) , byte(0x05) , byte(0x06) , byte(0x07) , byte(0x08) , byte(0x09) , byte(0x0a) , byte(0x0b) , byte(0x0c) , byte(0x0d) , byte(0x0e) , byte(0x0f) };
+			keyword = { uint8_t(0x00) , uint8_t(0x01) , uint8_t(0x02) , uint8_t(0x03) , uint8_t(0x04) , uint8_t(0x05) , uint8_t(0x06) , uint8_t(0x07) , uint8_t(0x08) , uint8_t(0x09) , uint8_t(0x0a) , uint8_t(0x0b) , uint8_t(0x0c) , uint8_t(0x0d) , uint8_t(0x0e) , uint8_t(0x0f) };
 
 			break;
 		case AES_standard::AES192:
 			std::cout << "AES-192 (NIST FIPS 197, Appendix C.2)" << std::endl;
 
 			//keyword = { byte(0x8e) , byte(0x73) , byte(0xb0) , byte(0xf7) , byte(0xda) , byte(0x0e) , byte(0x64) , byte(0x52) , byte(0xc8) , byte(0x10) , byte(0xf3) , byte(0x2b) , byte(0x80) , byte(0x90) , byte(0x79) , byte(0xe5) , byte(0x62) , byte(0xf8) , byte(0xea) , byte(0xd2) , byte(0x52) , byte(0x2c) , byte(0x6b) , byte(0x7b) };
-			keyword = { byte(0x00) , byte(0x01) , byte(0x02) , byte(0x03) , byte(0x04) , byte(0x05) , byte(0x06) , byte(0x07) , byte(0x08) , byte(0x09) , byte(0x0a) , byte(0x0b) , byte(0x0c) , byte(0x0d) , byte(0x0e) , byte(0x0f) , byte(0x10) , byte(0x11) , byte(0x12) , byte(0x13) , byte(0x14) , byte(0x15) , byte(0x16) , byte(0x17) };
+			keyword = { uint8_t(0x00) , uint8_t(0x01) , uint8_t(0x02) , uint8_t(0x03) , uint8_t(0x04) , uint8_t(0x05) , uint8_t(0x06) , uint8_t(0x07) , uint8_t(0x08) , uint8_t(0x09) , uint8_t(0x0a) , uint8_t(0x0b) , uint8_t(0x0c) , uint8_t(0x0d) , uint8_t(0x0e) , uint8_t(0x0f) , uint8_t(0x10) , uint8_t(0x11) , uint8_t(0x12) , uint8_t(0x13) , uint8_t(0x14) , uint8_t(0x15) , uint8_t(0x16) , uint8_t(0x17) };
 
 			break;
 		case AES_standard::AES256:
 			std::cout << "AES-256 (NIST FIPS 197, Appendix C.3)" << std::endl;
 
 			//keyword = { byte(0x60) , byte(0x3d) , byte(0xeb) , byte(0x10) , byte(0x15) , byte(0xca) , byte(0x71) , byte(0xbe) , byte(0x2b) , byte(0x73) , byte(0xae) , byte(0xf0) , byte(0x85) , byte(0x7d) , byte(0x77) , byte(0x81) , byte(0x1f) , byte(0x35) , byte(0x2c) , byte(0x07) , byte(0x3b) , byte(0x61) , byte(0x08) , byte(0xd7) , byte(0x2d) , byte(0x98) , byte(0x10) , byte(0xa3) , byte(0x09) , byte(0x14) , byte(0xdf) , byte(0xf4) };
-			keyword = { byte(0x00) , byte(0x01) , byte(0x02) , byte(0x03) , byte(0x04) , byte(0x05) , byte(0x06) , byte(0x07) , byte(0x08) , byte(0x09) , byte(0x0a) , byte(0x0b) , byte(0x0c) , byte(0x0d) , byte(0x0e) , byte(0x0f) , byte(0x10) , byte(0x11) , byte(0x12) , byte(0x13) , byte(0x14) , byte(0x15) , byte(0x16) , byte(0x17) , byte(0x18) , byte(0x19) , byte(0x1a) , byte(0x1b) , byte(0x1c) , byte(0x1d) , byte(0x1e) , byte(0x1f) };
+			keyword = { uint8_t(0x00) , uint8_t(0x01) , uint8_t(0x02) , uint8_t(0x03) , uint8_t(0x04) , uint8_t(0x05) , uint8_t(0x06) , uint8_t(0x07) , uint8_t(0x08) , uint8_t(0x09) , uint8_t(0x0a) , uint8_t(0x0b) , uint8_t(0x0c) , uint8_t(0x0d) , uint8_t(0x0e) , uint8_t(0x0f) , uint8_t(0x10) , uint8_t(0x11) , uint8_t(0x12) , uint8_t(0x13) , uint8_t(0x14) , uint8_t(0x15) , uint8_t(0x16) , uint8_t(0x17) , uint8_t(0x18) , uint8_t(0x19) , uint8_t(0x1a) , uint8_t(0x1b) , uint8_t(0x1c) , uint8_t(0x1d) , uint8_t(0x1e) , uint8_t(0x1f) };
 
 			break;
 	}
@@ -562,7 +578,7 @@ void AES_FIPS_197::test_standard(void)
 
 
 	//std::vector<byte> word = { byte(0x32) , byte(0x43) , byte(0xf6) , byte(0xa8) , byte(0x88) , byte(0x5a) , byte(0x30) , byte(0x8d) , byte(0x31) , byte(0x31) , byte(0x98) , byte(0xa2) , byte(0xe0) , byte(0x37) , byte(0x07) , byte(0x34) };
-	std::vector<byte> word = { byte(0x00) , byte(0x11) , byte(0x22) , byte(0x33) , byte(0x44) , byte(0x55) , byte(0x66) , byte(0x77) , byte(0x88) , byte(0x99) , byte(0xaa) , byte(0xbb) , byte(0xcc) , byte(0xdd) , byte(0xee) , byte(0xff) };
+	std::vector<uint8_t> word = { uint8_t(0x00) , uint8_t(0x11) , uint8_t(0x22) , uint8_t(0x33) , uint8_t(0x44) , uint8_t(0x55) , uint8_t(0x66) , uint8_t(0x77) , uint8_t(0x88) , uint8_t(0x99) , uint8_t(0xaa) , uint8_t(0xbb) , uint8_t(0xcc) , uint8_t(0xdd) , uint8_t(0xee) , uint8_t(0xff) };
 
 	this->_state = this->to_state(word);
 
@@ -580,7 +596,7 @@ void AES_FIPS_197::test_standard(void)
 	this->Cipher();
 	std::cout << std::endl;
 
-	std::vector<std::vector<byte>> _enc_state = this->_state;
+	std::vector<std::vector<uint8_t>> _enc_state = this->_state;
 
 	std::cout << "INVERSE CIPHER (DECRYPT):" << std::endl;
 	this->_state = _enc_state;
@@ -595,7 +611,7 @@ void AES_FIPS_197::test_standard(void)
 	this->verbose = _verbose;
 }
 
-void AES_FIPS_197::set_key(const std::vector<byte> &word)
+void AES_FIPS_197::set_key(const std::vector<uint8_t> &word)
 {
 	this->_key = {};
 
@@ -610,7 +626,7 @@ void AES_FIPS_197::set_key(const std::vector<byte> &word)
 	}
 }
 
-std::vector<byte> AES_FIPS_197::encrypt(const std::vector<byte> &word)
+std::vector<uint8_t> AES_FIPS_197::encrypt(const std::vector<uint8_t> &word)
 {
 	if (word.size() == 4 * this->Nb)
 	{
@@ -626,7 +642,7 @@ std::vector<byte> AES_FIPS_197::encrypt(const std::vector<byte> &word)
 	}
 }
 
-std::vector<byte> AES_FIPS_197::decrypt(const std::vector<byte> &word)
+std::vector<uint8_t> AES_FIPS_197::decrypt(const std::vector<uint8_t> &word)
 {
 	if (word.size() == 4 * this->Nb)
 	{

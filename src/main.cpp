@@ -15,8 +15,8 @@ int main(void)
 	//AES192.test_standard();
 
 	// AES-128 (NIST FIPS 197, Appendix C.3)
-	//AES_FIPS_197 AES256 = AES_FIPS_197(AES_standard::AES256);
-	//AES256.test_standard();
+	AES_FIPS_197 AES256 = AES_FIPS_197(AES_standard::AES256);
+	AES256.test_standard();
 
 	std::string secret = "Hello, Universe!";                    // 16 Bytes
 	std::string password = "3 is meglio che Uan & Ambrogio!!";  // 32 Bytes
